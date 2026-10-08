@@ -1,0 +1,99 @@
+classDiagram
+    class Owner {
+        +str name
+        +str preferred_wake_time
+        +str preferred_bed_time
+        +str[] preferred_task_times
+        +addPet(pet)
+        +updatePreferences(preferences)
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str notes
+        +addTask(task)
+        +updateInfo(details)
+    }
+
+    class CareTask {
+        +str title
+        +TaskType task_type
+        +int duration_minutes
+        +Priority priority
+        +str preferred_time
+        +bool is_recurring
+        +str notes
+        +update(details)
+    }
+
+    class SchedulingConstraints {
+        +str date
+        +str available_start_time
+        +str available_end_time
+        +int available_minutes
+        +bool respect_preferred_times
+        +validate()
+    }
+
+    class DailyPlan {
+        +str date
+        +int total_scheduled_minutes
+        +str summary
+        +ScheduledTask[] scheduled_tasks
+        +UnscheduledTask[] unscheduled_tasks
+        +getScheduledTasks()
+        +getUnscheduledTasks()
+        +explain()
+    }
+
+    class ScheduledTask {
+        +CareTask task
+        +str start_time
+        +str end_time
+        +str reason
+    }
+
+    class UnscheduledTask {
+        +CareTask task
+        +str reason
+    }
+
+    class Scheduler {
+        +generatePlan(owner, pet, tasks, constraints) DailyPlan
+        +rankTasks(tasks) CareTask[]
+        +findAvailableSlot(task, constraints, plan) str
+        +explainSelection(task, constraints) str
+    }
+
+    class TaskType {
+        <<enumeration>>
+        WALK
+        FEEDING
+        MEDICATION
+        ENRICHMENT
+        GROOMING
+        OTHER
+    }
+
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
+    }
+
+    Owner "1" o-- "0..*" Pet : cares for
+    Pet "1" *-- "0..*" CareTask : needs
+    CareTask --> TaskType : categorized as
+    CareTask --> Priority : ranked by
+    Owner --> SchedulingConstraints : provides preferences
+    Scheduler ..> Owner : uses
+    Scheduler ..> Pet : plans care for
+    Scheduler ..> SchedulingConstraints : applies
+    Scheduler ..> DailyPlan : generates
+    DailyPlan "1" *-- "0..*" ScheduledTask : contains
+    DailyPlan "1" *-- "0..*" UnscheduledTask : explains omissions
+    ScheduledTask --> CareTask : schedules
+    UnscheduledTask --> CareTask : could not schedule
