@@ -1,0 +1,70 @@
+classDiagram
+    class Task {
+        +str description
+        +time time
+        +date due_date
+        +str frequency
+        +bool is_completed
+        +int duration_minutes
+        +Priority priority
+        +__post_init__()
+        +mark_complete()
+        +mark_incomplete()
+        +create_next_occurrence(completed_on: date) Optional~Task~
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str notes
+        +Task[] tasks
+        +__post_init__()
+        +add_task(task)
+    }
+
+    class Owner {
+        +str name
+        +Pet[] pets
+        +__post_init__()
+        +add_pet(pet)
+        +get_all_tasks() Task[]
+    }
+
+    class Scheduler {
+        +get_all_tasks(owner) Task[]
+        +get_pending_tasks(owner) Task[]
+        +filter_tasks(owner, is_completed: Optional~bool~, pet_name: Optional~str~) Task[]
+        +sort_by_time(tasks) Task[]
+        +organize_tasks(owner) Task[]
+        +find_conflicts(owner) TaskConflict[]
+        +get_conflict_warnings(owner) str[]
+        +add_task(owner, pet, task) None
+        +mark_task_complete(owner, task, completed_on: Optional~date~) None
+    }
+
+    class TaskConflict {
+        +Pet first_pet
+        +Task first_task
+        +Pet second_pet
+        +Task second_task
+    }
+
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
+    }
+
+    Owner "1" o-- "0..*" Pet : manages
+    Pet "1" *-- "0..*" Task : has
+    Task --> Priority : has priority
+    TaskConflict "1" --> "2" Pet : identifies pets in conflict
+    TaskConflict "1" --> "2" Task : identifies overlapping tasks
+    Scheduler ..> Owner : retrieves tasks through get_all_tasks()
+    Scheduler ..> Pet : filters by name; finds task owner; adds next occurrence
+    Scheduler ..> Task : filters, sorts, completes, creates recurrence
+    Scheduler ..> TaskConflict : find_conflicts() returns records
+
+    note for Scheduler "organize_tasks(): pending tasks by time, then priority; untimed tasks last. sort_by_time(): chronological, untimed tasks last. filter_tasks(): optional completion-status and pet-name filters. find_conflicts(): overlapping task intervals on the same due date. get_conflict_warnings(): converts conflict records to warning strings. mark_task_complete(): completes the task and adds its daily or weekly next occurrence to its pet."

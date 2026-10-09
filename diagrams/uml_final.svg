@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1420" viewBox="0 0 1600 1420" role="img" aria-labelledby="title description">
+  <title id="title">PawPal+ UML class diagram</title>
+  <desc id="description">Class diagram showing Owner manages Pets, Pets contain Tasks, Scheduler operates across them, and TaskConflict records overlapping tasks and pets.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#526579"/>
+    </marker>
+    <marker id="diamond" markerWidth="14" markerHeight="12" refX="1" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M 1 6 L 7 1 L 13 6 L 7 11 z" fill="#ffffff" stroke="#526579" stroke-width="1.5"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #172b3a; }
+      .title { font-size: 30px; font-weight: 700; }
+      .subtitle { font-size: 15px; fill: #526579; }
+      .classbox { fill: #ffffff; stroke: #57748c; stroke-width: 2; rx: 12; }
+      .classhead { fill: #e8f1f8; }
+      .schedhead { fill: #e8f3ee; }
+      .confhead { fill: #fff2df; }
+      .enumhead { fill: #f2eafa; }
+      .classname { font-size: 21px; font-weight: 700; }
+      .stereotype { font-size: 13px; font-style: italic; fill: #526579; }
+      .member { font-size: 15px; }
+      .small { font-size: 13px; fill: #40566a; }
+      .section { font-size: 14px; font-weight: 700; fill: #40566a; }
+      .divider { stroke: #b8c7d3; stroke-width: 1.2; }
+      .association { fill: none; stroke: #526579; stroke-width: 2.2; marker-end: url(#arrow); }
+      .composition { fill: none; stroke: #526579; stroke-width: 2.2; marker-start: url(#diamond); marker-end: url(#arrow); }
+      .dependency { fill: none; stroke: #74899a; stroke-width: 2; stroke-dasharray: 8 6; marker-end: url(#arrow); }
+      .linklabel { font-size: 13px; font-weight: 600; fill: #40566a; }
+      .tag { fill: #f3f6f8; stroke: #ccd6de; stroke-width: 1; rx: 7; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1420" fill="#f7f9fb"/>
+  <text x="60" y="52" class="title">PawPal+ Class Diagram</text>
+  <text x="60" y="78" class="subtitle">Ownership flows Owner → Pet → Task; Scheduler coordinates tasks and reports conflicts.</text>
+
+  <!-- Ownership and domain classes -->
+  <g>
+    <rect x="60" y="115" width="310" height="185" class="classbox"/>
+    <path d="M 60 127 Q 60 115 72 115 H 358 Q 370 115 370 127 V 157 H 60 Z" class="classhead"/>
+    <text x="215" y="145" text-anchor="middle" class="classname">Owner</text>
+    <line x1="60" y1="157" x2="370" y2="157" class="divider"/>
+    <text x="80" y="184" class="section">Attributes</text>
+    <text x="80" y="207" class="member">+ name: str</text>
+    <text x="80" y="230" class="member">+ pets: list[Pet]</text>
+    <line x1="60" y1="245" x2="370" y2="245" class="divider"/>
+    <text x="80" y="270" class="member">+ add_pet(pet)</text>
+    <text x="80" y="291" class="member">+ get_all_tasks() → list[Task]</text>
+  </g>
+
+  <g>
+    <rect x="455" y="115" width="330" height="215" class="classbox"/>
+    <path d="M 455 127 Q 455 115 467 115 H 773 Q 785 115 785 127 V 157 H 455 Z" class="classhead"/>
+    <text x="620" y="145" text-anchor="middle" class="classname">Pet</text>
+    <line x1="455" y1="157" x2="785" y2="157" class="divider"/>
+    <text x="475" y="184" class="section">Attributes</text>
+    <text x="475" y="207" class="member">+ name: str</text>
+    <text x="475" y="230" class="member">+ species: str</text>
+    <text x="475" y="253" class="member">+ age: int</text>
+    <text x="475" y="276" class="member">+ notes: str</text>
+    <text x="475" y="299" class="member">+ tasks: list[Task]</text>
+    <line x1="455" y1="307" x2="785" y2="307" class="divider"/>
+    <text x="475" y="326" class="member">+ add_task(task)</text>
+  </g>
+
+  <g>
+    <rect x="920" y="115" width="430" height="375" class="classbox"/>
+    <path d="M 920 127 Q 920 115 932 115 H 1338 Q 1350 115 1350 127 V 157 H 920 Z" class="classhead"/>
+    <text x="1135" y="145" text-anchor="middle" class="classname">Task</text>
+    <line x1="920" y1="157" x2="1350" y2="157" class="divider"/>
+    <text x="942" y="184" class="section">Attributes</text>
+    <text x="942" y="207" class="member">+ description: str</text>
+    <text x="942" y="230" class="member">+ time: Optional[time]</text>
+    <text x="942" y="253" class="member">+ due_date: date</text>
+    <text x="942" y="276" class="member">+ frequency: str</text>
+    <text x="942" y="299" class="member">+ is_completed: bool</text>
+    <text x="942" y="322" class="member">+ duration_minutes: int</text>
+    <text x="942" y="345" class="member">+ priority: Priority</text>
+    <line x1="920" y1="360" x2="1350" y2="360" class="divider"/>
+    <text x="942" y="385" class="section">Methods</text>
+    <text x="942" y="409" class="member">+ mark_complete()</text>
+    <text x="942" y="432" class="member">+ mark_incomplete()</text>
+    <text x="942" y="455" class="member">+ create_next_occurrence(date) → Optional[Task]</text>
+    <text x="942" y="478" class="small">Creates the next daily or weekly occurrence.</text>
+  </g>
+
+  <!-- Core ownership relationships -->
+  <path d="M 370 205 H 455" class="composition"/>
+  <text x="382" y="193" class="linklabel">manages</text>
+  <text x="378" y="226" class="small">1</text>
+  <text x="430" y="226" class="small">0..*</text>
+
+  <path d="M 785 220 H 920" class="composition"/>
+  <text x="817" y="208" class="linklabel">contains</text>
+  <text x="794" y="241" class="small">1</text>
+  <text x="892" y="241" class="small">0..*</text>
+
+  <g>
+    <rect x="1000" y="555" width="270" height="150" class="classbox"/>
+    <path d="M 1000 567 Q 1000 555 1012 555 H 1258 Q 1270 555 1270 567 V 612 H 1000 Z" class="enumhead"/>
+    <text x="1135" y="580" text-anchor="middle" class="stereotype">&lt;&lt;enumeration&gt;&gt;</text>
+    <text x="1135" y="603" text-anchor="middle" class="classname">Priority</text>
+    <line x1="1000" y1="612" x2="1270" y2="612" class="divider"/>
+    <text x="1135" y="641" text-anchor="middle" class="member">LOW</text>
+    <text x="1135" y="665" text-anchor="middle" class="member">MEDIUM</text>
+    <text x="1135" y="689" text-anchor="middle" class="member">HIGH</text>
+  </g>
+  <path d="M 1135 490 V 555" class="association"/>
+  <text x="1148" y="529" class="linklabel">has priority</text>
+
+  <!-- Scheduler and its behavior -->
+  <g>
+    <rect x="330" y="790" width="850" height="555" class="classbox"/>
+    <path d="M 330 802 Q 330 790 342 790 H 1168 Q 1180 790 1180 802 V 837 H 330 Z" class="schedhead"/>
+    <text x="755" y="824" text-anchor="middle" class="classname">Scheduler</text>
+    <line x1="330" y1="837" x2="1180" y2="837" class="divider"/>
+    <text x="355" y="864" class="section">Operations</text>
+    <text x="355" y="890" class="member">+ get_all_tasks(owner) → list[Task]</text>
+    <text x="355" y="915" class="member">+ get_pending_tasks(owner) → list[Task]</text>
+    <text x="355" y="940" class="member">+ filter_tasks(owner, is_completed?, pet_name?) → list[Task]</text>
+    <text x="355" y="965" class="member">+ sort_by_time(tasks) → list[Task]</text>
+    <text x="355" y="990" class="member">+ organize_tasks(owner) → list[Task]</text>
+    <text x="355" y="1015" class="member">+ find_conflicts(owner) → list[TaskConflict]</text>
+    <text x="355" y="1040" class="member">+ get_conflict_warnings(owner) → list[str]</text>
+    <text x="355" y="1065" class="member">+ add_task(owner, pet, task)</text>
+    <text x="355" y="1090" class="member">+ mark_task_complete(owner, task, completed_on?)</text>
+    <line x1="330" y1="1110" x2="1180" y2="1110" class="divider"/>
+    <text x="355" y="1137" class="section">Scheduling behavior</text>
+    <text x="355" y="1162" class="small">• Uses Owner.get_all_tasks() to retrieve tasks across all pets.</text>
+    <text x="355" y="1185" class="small">• Filters by pet name and/or completion status; pet-name matching ignores case.</text>
+    <text x="355" y="1208" class="small">• sort_by_time() is chronological and places untimed tasks last.</text>
+    <text x="355" y="1231" class="small">• organize_tasks() orders pending tasks by time, then priority.</text>
+    <text x="355" y="1254" class="small">• Detects same-date interval overlaps; warning method returns readable messages.</text>
+    <text x="355" y="1277" class="small">• Completing a daily/weekly task adds its next occurrence to the same pet.</text>
+    <text x="355" y="1315" class="small">TaskConflict records contain the two pets and tasks involved in each overlap.</text>
+  </g>
+
+  <!-- Conflict result model -->
+  <g>
+    <rect x="1260" y="900" width="300" height="265" class="classbox"/>
+    <path d="M 1260 912 Q 1260 900 1272 900 H 1548 Q 1560 900 1560 912 V 945 H 1260 Z" class="confhead"/>
+    <text x="1410" y="929" text-anchor="middle" class="classname">TaskConflict</text>
+    <line x1="1260" y1="945" x2="1560" y2="945" class="divider"/>
+    <text x="1280" y="976" class="section">Conflict pair</text>
+    <text x="1280" y="1005" class="member">+ first_pet: Pet</text>
+    <text x="1280" y="1032" class="member">+ first_task: Task</text>
+    <text x="1280" y="1059" class="member">+ second_pet: Pet</text>
+    <text x="1280" y="1086" class="member">+ second_task: Task</text>
+    <line x1="1260" y1="1100" x2="1560" y2="1100" class="divider"/>
+    <text x="1280" y="1127" class="small">Returned for each overlapping pair.</text>
+    <text x="1280" y="1148" class="small">Warnings are formatted by Scheduler.</text>
+  </g>
+
+  <!-- Scheduler dependencies, routed through open space -->
+  <path d="M 430 790 V 750 H 215 V 300" class="dependency"/>
+  <text x="75" y="735" class="linklabel">uses owner task collection</text>
+
+  <path d="M 520 790 V 365 H 620 V 330" class="dependency"/>
+  <text x="530" y="390" class="linklabel">uses pets</text>
+
+  <path d="M 860 790 V 735 H 870 V 280 H 920" class="dependency"/>
+  <text x="875" y="725" class="linklabel">organizes tasks</text>
+
+  <path d="M 1180 1000 H 1260" class="dependency"/>
+  <text x="1186" y="985" class="linklabel">returns</text>
+
+  <rect x="60" y="1370" width="1480" height="1" fill="#d4dde5"/>
+  <text x="60" y="1395" class="subtitle">Solid composition: owned parts  •  Dashed dependency: Scheduler uses or returns model objects</text>
+</svg>

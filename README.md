@@ -83,43 +83,55 @@ tests\test_pawpal.py .............                                       [100%]
 ============================= 13 passed in 0.04s ==============================
 ```
 
-## 📐 Smarter Scheduling
+Based on the test results I have a Confidence Level of 5 in the systems reliability.
 
-Example:
-**| Feature |**
-- `Methods`  
-Notes 
 
-------------------------------------------------------------------------------------
+## Features
 
-**| Task sorting |**
-- `Scheduler.sort_by_time()`
-- `Scheduler.organize_tasks()`
-Orders tasks by time; untimed tasks come last. The organized list excludes      completed tasks and uses priority to break time ties. 
+| Feature | Methods | Notes |
+|---|---|---|
+| Multi-pet task tracking | `Owner.add_pet()`, `Owner.get_all_tasks()`, `Pet.add_task()`, `Scheduler.add_task()` | Stores care tasks under each pet and lets the scheduler retrieve or add tasks for an owner's pets. |
+| Schedule sorting | `Scheduler.sort_by_time()`, `Scheduler.organize_tasks()` | `sort_by_time()` orders tasks chronologically and puts tasks without a time last. `organize_tasks()` excludes completed tasks, orders pending tasks by time, and uses higher priority to break same-time ties. |
+| Task filtering | `Scheduler.filter_tasks()`, `Scheduler.get_pending_tasks()` | Filters by optional completion status and pet name; pet-name matching is case-insensitive. The pending-task method returns incomplete tasks across the owner's pets. |
+| Conflict warnings | `Scheduler.find_conflicts()`, `Scheduler.get_conflict_warnings()` | Detects overlapping task intervals on the same due date, including tasks for different pets. Completed and untimed tasks are ignored; intervals that only touch at an endpoint are not considered conflicts. Conflicts are returned as records and formatted as warning messages. |
+| Recurring tasks | `Task.create_next_occurrence()`, `Scheduler.mark_task_complete()` | Completing a daily task creates an incomplete occurrence due one day later; weekly recurrence is due seven days later. Other frequencies do not recur automatically, and completing the same task again does not create a duplicate occurrence. |
+| Streamlit schedule display | `app.py` | The UI lets users enter an owner name, add pets and care tasks, view a time-sorted pending schedule, see conflict warnings, and filter the task list by pet and completion status. |
 
-**| Task filtering |**
-- `Scheduler.filter_tasks()`
-- `Scheduler.get_pending_tasks()`
-Filter by pet name (case-insensitive) and/or completion status; pending tasks exclude completed tasks. 
-
-**| Conflict detection |** 
-- `Scheduler.find_conflicts()`
-- `Scheduler.get_conflict_warnings()` 
-Warns when task intervals overlap on the same date. Completed and untimed tasks are ignored. 
-
-**| Recurring tasks |** 
-- `Task.create_next_occurrence()`
-- `Scheduler.mark_task_complete()` 
-Completing daily or weekly tasks creates an incomplete occurrence due 1 or 7 days later. Other frequencies do not repeat automatically. 
+The current scheduler organizes tasks using their scheduled times, durations, priorities, and recurrence settings. It does not yet optimize around owner availability or preferences, or explain why it selected a particular plan.
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### Using the Streamlit app
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+Start the app from the project root:
+
+```bash
+streamlit run app.py
+```
+
+1. Enter or update the owner name, then add a pet by entering its name, choosing a species, and selecting **Add pet**.
+2. In **Add a care task**, select a pet and enter a task description, time, frequency, duration, and priority. Select **Schedule task** to add it.
+3. Review **Today's Schedule**. It lists pending tasks ordered by scheduled time, with untimed tasks last; when tasks share a time, higher-priority tasks come first. The app shows conflict warnings when scheduled task intervals overlap on the same due date.
+4. Use **All Care Tasks** to view task details and filter the list by pet and completion status. Task times are sorted chronologically, with untimed tasks last.
+5. The scheduler can also create the next daily or weekly occurrence when a task is marked complete through its Python API. The current Streamlit UI does not include a control for marking tasks complete.
+
+### Sample CLI output
+
+Run the sample multi-pet schedule from the project root:
+
+```bash
+python main.py
+```
+
+Output:
+
+```text
+Today's Schedule
+Warning: Biscuit: 'Morning walk' overlaps Mochi: 'Morning feeding'.
+07:30 AM - Biscuit: Morning walk
+07:30 AM - Mochi: Morning feeding
+08:00 AM - Mochi: Breakfast
+06:00 PM - Biscuit: Evening walk
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

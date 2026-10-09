@@ -16,7 +16,6 @@ The classes I included are Owner to store owner details and scheduling        pr
 
 The initial UML included a broader planning design with scheduling constraints and daily plan objects. During implementation, I narrowed the code to the requested `Task`, `Pet`, `Owner`, and `Scheduler` classes. `Owner.get_all_tasks()` now gathers tasks across pets, and the scheduler organizes those tasks without relying on a single pet.
 
-
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
@@ -34,7 +33,7 @@ The scheduler filters out completed tasks and orders the remaining tasks by sche
 - **Why is that tradeoff reasonable for this scenario?**
 
 The scheduler prioritizes each task’s scheduled time over its priority, using priority only to break ties. This keeps tasks at the times the owner assigned, making the schedule easy to follow. The tradeoff is that a high-priority task won’t move ahead of an earlier low-priority task; handling that would require more scheduling rules.
----
+
 
 ## 3. AI Collaboration
 
@@ -57,8 +56,6 @@ AI suggested reducing duplicated task sources, using explicit time values, deriv
 
 I verified the result by running the two pytest tests for task completion and task addition (both passed), checking Python syntax and Pylance diagnostics, and running `main.py` to confirm that tasks for two pets printed in time order. I also ran a focused multi-pet check to confirm that the scheduler retrieves tasks through the owner's `get_all_tasks()` method.
 
----
-
 ## 4. Testing and Verification
 
 **a. What you tested**
@@ -74,7 +71,6 @@ I tested that mark_complete() changes a task’s completion status and that addi
 - **What edge cases would you test next if you had more time?**
 
 I’m confident these basic behaviors work, but the tests don’t cover the scheduler comprehensively. Next, I’d add tests for empty owners, completed tasks being excluded, tasks with equal or missing times, priority tie-breaking, duplicate tasks, and attempts to add or complete tasks for pets or owners they don’t belong to.
----
 
 ## 5. Reflection
 
