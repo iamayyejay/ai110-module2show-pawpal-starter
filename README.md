@@ -12,6 +12,14 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 
 Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
 
+## UML Class Diagram
+
+The initial class design for owners, pets, care tasks, scheduling constraints, and explained daily plans is in [`diagrams/uml.mmd`](diagrams/uml.mmd). It is a conceptual design to guide implementation and should be updated to match the finished app.
+
+## Implementation Summary
+
+The current Python implementation models care activities as `Task` objects, which store a description, scheduled time, due date, frequency, completion status, duration, and priority. Each `Pet` stores its details and tasks, while `Owner` manages multiple pets and provides `get_all_tasks()` to collect their tasks. `Scheduler` uses that owner method to retrieve tasks across pets, filter out completed tasks, and organize the remaining tasks by time and priority. Completing an owned daily or weekly task through the scheduler adds its next occurrence to the same pet. It can also add tasks to the owner's pets. The sample `main.py` demonstrates a multi-pet schedule in the terminal.
+
 ## What you will build
 
 Your final app should:
@@ -46,13 +54,10 @@ pip install -r requirements.txt
 
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
-```
+Today's Schedule
+07:30 AM - Biscuit: Morning walk
+08:00 AM - Mochi: Breakfast
+06:00 PM - Biscuit: Evening walk
 
 ## 🧪 Testing PawPal+
 
@@ -72,14 +77,12 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Feature | Methods | Notes |
+|---------|---------|-------|
+| Task sorting | `Scheduler.sort_by_time()`<br>`Scheduler.organize_tasks()` | Orders tasks by time; untimed tasks come last. The organized list excludes completed tasks and uses priority to break time ties. |
+| Task filtering | `Scheduler.filter_tasks()`<br>`Scheduler.get_pending_tasks()` | Filter by pet name (case-insensitive) and/or completion status; pending tasks exclude completed tasks. |
+| Conflict detection | `Scheduler.find_conflicts()`<br>`Scheduler.get_conflict_warnings()` | Warns when task intervals overlap on the same date. Completed and untimed tasks are ignored. |
+| Recurring tasks | `Task.create_next_occurrence()`<br>`Scheduler.mark_task_complete()` | Completing daily or weekly tasks creates an incomplete occurrence due 1 or 7 days later. Other frequencies do not repeat automatically. |
 
 ## 📸 Demo Walkthrough
 

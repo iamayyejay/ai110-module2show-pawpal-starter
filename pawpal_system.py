@@ -1,36 +1,62 @@
-"""Data models and class stubs for the PawPal+ pet-care planner."""
+"""Core data models and task-management logic for PawPal+."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from datetime import date, datetime, time as Time, timedelta
+from enum import IntEnum
 
 
-class TaskType(Enum):
-    WALK = "walk"
-    FEEDING = "feeding"
-    MEDICATION = "medication"
-    ENRICHMENT = "enrichment"
-    GROOMING = "grooming"
-    OTHER = "other"
-
-
-class Priority(Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
+class Priority(IntEnum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
 
 
 @dataclass
-class CareTask:
-    title: str
-    task_type: TaskType
-    duration_minutes: int
-    priority: Priority
-    preferred_time: str = ""
-    is_recurring: bool = False
-    notes: str = ""
+class Task:
+    description: str
+    time: Time | None = None
+    frequency: str = "daily"
+    is_completed: bool = False
+    duration_minutes: int = 30
+    priority: Priority = Priority.MEDIUM
+    due_date: date = field(default_factory=date.today)
 
-    def update(self, details: dict[str, object]) -> None:
-        raise NotImplementedError
+    def __post_init__(self) -> None:
+        """Validate the task's required values."""
+        if not self.description.strip():
+            raise ValueError("Task description cannot be empty.")
+        if not self.frequency.strip():
+            raise ValueError("Task frequency cannot be empty.")
+        if self.duration_minutes <= 0:
+            raise ValueError("Task duration must be greater than zero.")
+
+    def mark_complete(self) -> None:
+        """Mark this task as completed."""
+        self.is_completed = True
+
+    def mark_incomplete(self) -> None:
+        """Mark this task as not completed."""
+        self.is_completed = False
+
+    def create_next_occurrence(self, completed_on: date) -> Task | None:
+        """Create the next recurring task, or return None for unsupported frequencies.
+
+        The new task copies this task's care details, starts incomplete, and is due
+        one or seven days after ``completed_on`` for daily or weekly recurrence.
+        """
+        interval_days = {"daily": 1, "weekly": 7}.get(self.frequency.strip().casefold())
+        if interval_days is None:
+            return None
+        return Task(
+            description=self.description,
+            time=self.time,
+            frequency=self.frequency,
+            duration_minutes=self.duration_minutes,
+            priority=self.priority,
+            due_date=completed_on + timedelta(days=interval_days),
+        )
 
 
 @dataclass
@@ -39,98 +65,177 @@ class Pet:
     species: str
     age: int = 0
     notes: str = ""
-    tasks: list[CareTask] = field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
 
-    def add_task(self, task: CareTask) -> None:
-        raise NotImplementedError
+    def __post_init__(self) -> None:
+        """Validate the pet's required details."""
+        if not self.name.strip():
+            raise ValueError("Pet name cannot be empty.")
+        if not self.species.strip():
+            raise ValueError("Pet species cannot be empty.")
+        if self.age < 0:
+            raise ValueError("Pet age cannot be negative.")
 
-    def update_info(self, details: dict[str, object]) -> None:
-        raise NotImplementedError
+    def add_task(self, task: Task) -> None:
+        """Add a task to this pet."""
+        if any(existing is task for existing in self.tasks):
+            raise ValueError("Task is already assigned to this pet.")
+        self.tasks.append(task)
+
+
+@dataclass(frozen=True)
+class TaskConflict:
+    first_pet: Pet
+    first_task: Task
+    second_pet: Pet
+    second_task: Task
 
 
 @dataclass
 class Owner:
     name: str
-    preferred_wake_time: str = ""
-    preferred_bed_time: str = ""
-    preferred_task_times: list[str] = field(default_factory=list)
     pets: list[Pet] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        """Validate the owner's name."""
+        if not self.name.strip():
+            raise ValueError("Owner name cannot be empty.")
+
     def add_pet(self, pet: Pet) -> None:
-        raise NotImplementedError
+        """Register a pet with this owner."""
+        if any(existing is pet for existing in self.pets):
+            raise ValueError("Pet is already registered to this owner.")
+        self.pets.append(pet)
 
-    def update_preferences(self, preferences: dict[str, object]) -> None:
-        raise NotImplementedError
-
-
-@dataclass
-class SchedulingConstraints:
-    date: str
-    available_start_time: str
-    available_end_time: str
-    available_minutes: int
-    respect_preferred_times: bool = True
-
-    def validate(self) -> bool:
-        raise NotImplementedError
-
-
-@dataclass
-class ScheduledTask:
-    task: CareTask
-    start_time: str
-    end_time: str
-    reason: str
-
-
-@dataclass
-class UnscheduledTask:
-    task: CareTask
-    reason: str
-
-
-@dataclass
-class DailyPlan:
-    date: str
-    total_scheduled_minutes: int = 0
-    summary: str = ""
-    scheduled_tasks: list[ScheduledTask] = field(default_factory=list)
-    unscheduled_tasks: list[UnscheduledTask] = field(default_factory=list)
-
-    def get_scheduled_tasks(self) -> list[ScheduledTask]:
-        raise NotImplementedError
-
-    def get_unscheduled_tasks(self) -> list[UnscheduledTask]:
-        raise NotImplementedError
-
-    def explain(self) -> str:
-        raise NotImplementedError
+    def get_all_tasks(self) -> list[Task]:
+        """Return the tasks belonging to all of this owner's pets."""
+        return [task for pet in self.pets for task in pet.tasks]
 
 
 class Scheduler:
-    def generate_plan(
+    """Retrieves, orders, and updates tasks across all of an owner's pets."""
+
+    def get_all_tasks(self, owner: Owner) -> list[Task]:
+        """Retrieve all tasks from the owner's pets."""
+        return owner.get_all_tasks()
+
+    def get_pending_tasks(self, owner: Owner) -> list[Task]:
+        """Return all incomplete tasks from the owner's pets."""
+        return [
+            task for task in owner.get_all_tasks()
+            if not task.is_completed
+        ]
+
+    def filter_tasks(
         self,
         owner: Owner,
-        pet: Pet,
-        tasks: list[CareTask],
-        constraints: SchedulingConstraints,
-    ) -> DailyPlan:
-        raise NotImplementedError
+        is_completed: bool | None = None,
+        pet_name: str | None = None,
+    ) -> list[Task]:
+        """Filter owned tasks by optional completion status and pet name.
 
-    def rank_tasks(self, tasks: list[CareTask]) -> list[CareTask]:
-        raise NotImplementedError
+        Pet names are matched case-insensitively. When both filters are supplied,
+        a task must satisfy both; omitted filters do not restrict the results.
+        """
+        normalized_pet_name = pet_name.strip().casefold() if pet_name is not None else None
+        return [
+            task
+            for pet in owner.pets
+            for task in pet.tasks
+            if (is_completed is None or task.is_completed == is_completed)
+            and (
+                normalized_pet_name is None
+                or pet.name.casefold() == normalized_pet_name
+            )
+        ]
 
-    def find_available_slot(
+    def sort_by_time(self, tasks: list[Task]) -> list[Task]:
+        """Return tasks chronologically, placing tasks without a time last."""
+        return sorted(tasks, key=lambda task: task.time or Time.max)
+
+    def organize_tasks(self, owner: Owner) -> list[Task]:
+        """Return pending tasks by time, then priority, with untimed tasks last.
+
+        Earlier scheduled tasks come first; higher priority breaks ties at the
+        same time. Completed tasks are omitted.
+        """
+        return sorted(
+            self.get_pending_tasks(owner),
+            key=lambda task: (
+                task.time is None,
+                task.time or Time.max,
+                -task.priority,
+            ),
+        )
+
+    def find_conflicts(self, owner: Owner) -> list[TaskConflict]:
+        """Find pending task intervals that overlap on the same due date.
+
+        Tasks without a time and completed tasks are ignored. Intervals that only
+        touch at an endpoint are not conflicts. The result identifies both pets
+        and tasks for each overlapping pair.
+        """
+        scheduled: list[tuple[Pet, Task, datetime, datetime]] = []
+        for pet in owner.pets:
+            for task in pet.tasks:
+                if task.is_completed or task.time is None:
+                    continue
+                start = datetime.combine(task.due_date, task.time)
+                end = start + timedelta(minutes=task.duration_minutes)
+                scheduled.append((pet, task, start, end))
+
+        conflicts: list[TaskConflict] = []
+        for index, (first_pet, first_task, first_start, first_end) in enumerate(scheduled):
+            for second_pet, second_task, second_start, second_end in scheduled[index + 1:]:
+                if first_task is second_task:
+                    continue
+                if first_start < second_end and second_start < first_end:
+                    conflicts.append(
+                        TaskConflict(first_pet, first_task, second_pet, second_task)
+                    )
+        return conflicts
+
+    def get_conflict_warnings(self, owner: Owner) -> list[str]:
+        """Return one readable warning per conflict, or an empty list if none exist."""
+        return [
+            (
+                f"{conflict.first_pet.name}: '{conflict.first_task.description}' overlaps "
+                f"{conflict.second_pet.name}: '{conflict.second_task.description}'."
+            )
+            for conflict in self.find_conflicts(owner)
+        ]
+
+    def add_task(self, owner: Owner, pet: Pet, task: Task) -> None:
+        """Add a task to a pet registered to the owner."""
+        if pet not in owner.pets:
+            raise ValueError("Cannot add a task to a pet not owned by this owner.")
+        pet.add_task(task)
+
+    def mark_task_complete(
         self,
-        task: CareTask,
-        constraints: SchedulingConstraints,
-        plan: DailyPlan,
-    ) -> str:
-        raise NotImplementedError
+        owner: Owner,
+        task: Task,
+        completed_on: date | None = None,
+    ) -> None:
+        """Complete an owned task and add its next daily or weekly occurrence.
 
-    def explain_selection(
-        self,
-        task: CareTask,
-        constraints: SchedulingConstraints,
-    ) -> str:
-        raise NotImplementedError
+        Raises ValueError if the task is not owned by ``owner``. Repeated calls
+        for an already completed task do nothing, preventing duplicate recurrence.
+        """
+        pet = next(
+            (
+                pet
+                for pet in owner.pets
+                if any(owned_task is task for owned_task in pet.tasks)
+            ),
+            None,
+        )
+        if pet is None:
+            raise ValueError("Cannot complete a task that does not belong to this owner.")
+        if task.is_completed:
+            return
+
+        task.mark_complete()
+        next_task = task.create_next_occurrence(completed_on or date.today())
+        if next_task is not None:
+            pet.add_task(next_task)
