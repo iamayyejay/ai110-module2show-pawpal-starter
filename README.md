@@ -61,28 +61,56 @@ Today's Schedule
 
 ## 🧪 Testing PawPal+
 
+Run the test suite from the project root:
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests cover task completion and addition, chronological sorting, task filtering, daily and weekly recurrence, non-recurring tasks, duplicate completion handling, and conflict detection and warnings for overlapping tasks.
 
-```
-# Paste your pytest output here
+Successful terminal output:
+
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\inthe\Desktop\CodePath\AI110\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 13 items
+
+tests\test_pawpal.py .............                                       [100%]
+
+============================= 13 passed in 0.04s ==============================
 ```
 
 ## 📐 Smarter Scheduling
 
-| Feature | Methods | Notes |
-|---------|---------|-------|
-| Task sorting | `Scheduler.sort_by_time()`<br>`Scheduler.organize_tasks()` | Orders tasks by time; untimed tasks come last. The organized list excludes completed tasks and uses priority to break time ties. |
-| Task filtering | `Scheduler.filter_tasks()`<br>`Scheduler.get_pending_tasks()` | Filter by pet name (case-insensitive) and/or completion status; pending tasks exclude completed tasks. |
-| Conflict detection | `Scheduler.find_conflicts()`<br>`Scheduler.get_conflict_warnings()` | Warns when task intervals overlap on the same date. Completed and untimed tasks are ignored. |
-| Recurring tasks | `Task.create_next_occurrence()`<br>`Scheduler.mark_task_complete()` | Completing daily or weekly tasks creates an incomplete occurrence due 1 or 7 days later. Other frequencies do not repeat automatically. |
+Example:
+**| Feature |**
+- `Methods`  
+Notes 
+
+------------------------------------------------------------------------------------
+
+**| Task sorting |**
+- `Scheduler.sort_by_time()`
+- `Scheduler.organize_tasks()`
+Orders tasks by time; untimed tasks come last. The organized list excludes      completed tasks and uses priority to break time ties. 
+
+**| Task filtering |**
+- `Scheduler.filter_tasks()`
+- `Scheduler.get_pending_tasks()`
+Filter by pet name (case-insensitive) and/or completion status; pending tasks exclude completed tasks. 
+
+**| Conflict detection |** 
+- `Scheduler.find_conflicts()`
+- `Scheduler.get_conflict_warnings()` 
+Warns when task intervals overlap on the same date. Completed and untimed tasks are ignored. 
+
+**| Recurring tasks |** 
+- `Task.create_next_occurrence()`
+- `Scheduler.mark_task_complete()` 
+Completing daily or weekly tasks creates an incomplete occurrence due 1 or 7 days later. Other frequencies do not repeat automatically. 
 
 ## 📸 Demo Walkthrough
 
